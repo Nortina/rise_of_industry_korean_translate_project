@@ -1,67 +1,39 @@
 <template>
-  <section class="container">
-    <div>
-      <logo />
-      <h1 class="title">
-        rise_of_industry_korean_translate_project
-      </h1>
-      <h2 class="subtitle">
-        My majestic Nuxt.js project
-      </h2>
-      <div class="links">
-        <a href="https://nuxtjs.org/" target="_blank" class="button--green"
-          >Documentation</a
-        >
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          class="button--grey"
-          >GitHub</a
-        >
+  <div>
+    <div class="columns">
+      <div class="column">
+        <TypesPanel :types.sync="types" :selectedTypeIndex.sync="selectedTypeIndex"/>
+      </div>
+
+      <div class="column">
+        <DatasPanel :types="types" :selectedTypeIndex="selectedTypeIndex"/>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
+import Vue from 'vue'
+import axios from 'axios'
+import TypesPanel from '../components/TypesPanel'
+import DatasPanel from '../components/DatasPanel'
 
 export default {
-  components: {
-    Logo
+  components: { TypesPanel, DatasPanel },
+  data() {
+    return {
+      types: [],
+      selectedTypeIndex: 0
+    }
+  },
+  methods: {
+    init() {}
+  },
+  mounted() {
+    this.init()
   }
 }
 </script>
 
 <style>
-.container {
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
-}
 </style>

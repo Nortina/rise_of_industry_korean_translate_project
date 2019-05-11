@@ -1,30 +1,31 @@
 const express = require('express')
 const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
+const mongoose = require('mongoose')
 const app = express()
 
-// Import and Set Nuxt.js options
 const config = require('../nuxt.config.js')
 config.dev = !(process.env.NODE_ENV === 'production')
 
 async function start() {
-  // Init Nuxt.js
   const nuxt = new Nuxt(config)
-
   const { host, port } = nuxt.options.server
 
-  // Build only in dev mode
   if (config.dev) {
     const builder = new Builder(nuxt)
     await builder.build()
-  } else {
+  }
+  else {
     await nuxt.ready()
   }
 
-  // Give nuxt middleware to express
   app.use(nuxt.render)
 
-  // Listen the server
+  mongoose.Promise = global.Promise;
+  mongoose.connect('mongodb://localhost:27017/roikorean', { useNewUrlParser: true })
+    .then(() => console.log('Successfully connected to mongodb'))
+    .catch(e => console.error(e));
+
   app.listen(port, host)
   consola.ready({
     message: `Server listening on http://${host}:${port}`,

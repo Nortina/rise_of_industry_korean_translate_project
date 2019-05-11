@@ -1,6 +1,32 @@
 <template>
   <div>
-    <nuxt />
+    <section class="hero">
+      <div class="hero-body">
+        <div class="container">
+          <nav class="level">
+            <div class="level-item title has-text-centered">라이즈 오브 인더스트리 한글로 하고싶어서 만든 사이트</div>
+          </nav>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <nuxt></nuxt>
+    </section>
+
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          <strong>Bulma</strong> by
+          <a href="https://jgthms.com">Jeremy Thomas</a>. The source code is licensed
+          <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
+          is licensed
+          <a
+            href="http://creativecommons.org/licenses/by-nc-sa/4.0/"
+          >CC BY NC SA 4.0</a>.
+        </p>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -22,34 +48,5 @@ html {
 *:after {
   box-sizing: border-box;
   margin: 0;
-}
-
-.button--green {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #3b8070;
-  color: #3b8070;
-  text-decoration: none;
-  padding: 10px 30px;
-}
-
-.button--green:hover {
-  color: #fff;
-  background-color: #3b8070;
-}
-
-.button--grey {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #35495e;
-  color: #35495e;
-  text-decoration: none;
-  padding: 10px 30px;
-  margin-left: 15px;
-}
-
-.button--grey:hover {
-  color: #fff;
-  background-color: #35495e;
 }
 </style>
