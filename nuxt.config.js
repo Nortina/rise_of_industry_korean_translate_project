@@ -1,4 +1,6 @@
 const pkg = require('./package')
+const bodyParser = require('body-parser')
+const session = require('express-session')
 
 module.exports = {
   mode: 'universal',
@@ -36,19 +38,15 @@ module.exports = {
           customProperties: false
         }
       }
-    },
-    extend(config, ctx) {
-      // if (ctx.isDev && ctx.isClient) {
-      //   config.module.rules.push({
-      //     enforce: 'pre',
-      //     test: /\.(js|vue)$/,
-      //     loader: 'eslint-loader',
-      //     exclude: /(node_modules)/
-      //   })
-      // }
     }
   },
   serverMiddleware: [
+    bodyParser.json(),
+    session({
+      secret: 'super-secret-key',
+      resave: false,
+      saveUninitialized: true
+    }),
     '~/server/api/index.js',
   ],
 }

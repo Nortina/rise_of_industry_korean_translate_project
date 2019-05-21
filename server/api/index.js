@@ -6,6 +6,23 @@ import { callbackify } from 'util';
 const app = express()
 
 app.post('/datas/reset', async (req, res) => {
+    // Data.find((err, list) => {
+    //     list.forEach(item => {
+    //         if (item.translatedText > 0) {
+    //             let translatedText = item.translatedText[0];
+
+    //             Data.updateOne(
+    //                 {
+    //                     _id: item._id,
+    //                     'translatedText._id': translatedText._id,
+    //                 }, {
+    //                     'translatedText.$.sessionID': null
+    //                 })
+    //         }
+    //     })
+
+    //     res.status('200').end()
+    // })
 
     // Data.find((err, res) => {
     //     res.forEach(item => {
@@ -104,7 +121,7 @@ app.post('/datas/reset', async (req, res) => {
     //     }
     // })
 
-    res.status('200').end()
+    res.sendStatus('200')
     return
 })
 
@@ -114,10 +131,23 @@ app.get('/datas', (req, res) => {
     Data.find({ type }, (err, datas) => {
         if (err) {
             console.error(err)
-            res.status('500').end()
+            res.sendStatus('500')
         }
 
         res.json(datas)
+    })
+})
+
+app.get('/data', (req, res) => {
+    const _id = req.query['_id']
+
+    Data.findById({ _id }, (err, data) => {
+        if (err) {
+            console.error(err)
+            res.sendStatus('500')
+        }
+
+        res.json(data)
     })
 })
 
@@ -147,11 +177,76 @@ app.get('/datas/types', (req, res) => {
     ], (err, types) => {
         if (err) {
             console.error(err)
-            res.status('500').end()
+            res.sendStatus('500')
         }
 
         res.json(types)
     })
+})
+
+app.post('/datas/translate', (req, res) => {
+    const sessionID = req.sessionID;
+    const { _id, text } = req.body;
+
+    if (!sessionID || !_id || !text) {
+        res.sendStatus(400)
+        return
+    }
+
+    Data.updateOne({ _id },
+        {
+            $push: {
+                translatedText: { text, sessionID },
+            }
+        },
+        (err) => {
+            if (err) {
+                console.error(err)
+                res.sendStatus('500')
+            }
+
+            Data.findById(_id,
+                (err, data) => {
+                    if (err) {
+                        console.error(err)
+                        res.sendStatus('500')
+                    }
+
+                    if (data.translatedText && data.translatedText.length > 0) {
+                        let texts = []
+
+                        data.translatedText.forEach(text => {
+                            let map = texts.find(item => item._id == text.text)
+                            if (!map) {
+                                map = {
+                                    _id: text.text,
+                                    count: 0,
+                                }
+
+                                texts.push(map)
+                            }
+
+                            map.count += 1
+                        })
+
+                        texts = texts.sort((a, b) => {
+                            return a.count < b.count ? 1 : a.count > b.count ? -1 : 0
+                        })
+
+                        const bestTranslate = texts[0]._id
+
+                        Data.updateOne({ _id }, { bestTranslate },
+                            (err) => {
+                                if (err) {
+                                    console.error(err)
+                                    res.sendStatus('500')
+                                }
+
+                                res.sendStatus(200)
+                            })
+                    }
+                })
+        })
 })
 
 module.exports = {

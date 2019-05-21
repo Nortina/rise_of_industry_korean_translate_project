@@ -20,6 +20,11 @@ const DataSchema = new mongoose.Schema(
         },
         translatedText: [{
             text: String,
+            sessionID: {
+                type: String,
+                default: null,
+                unique: true,
+            },
             registerTime: {
                 type: Date,
                 default: Date.now,

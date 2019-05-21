@@ -1,14 +1,33 @@
 <template>
   <div>
-    <div class="columns">
-      <div class="column">
-        <TypesPanel :types.sync="types" :selectedTypeIndex.sync="selectedTypeIndex"/>
+    <section class="hero has-background-dark">
+      <div class="hero-body">
+        <progress
+          class="progress has-background-dark is-success"
+          :max="totalCount"
+          :value="translatedCount"
+        />
+        <div
+          class="title is-4 has-text-centered has-text-light"
+        >{{translatedCount}} / {{totalCount}}</div>
       </div>
+    </section>
 
-      <div class="column">
-        <DatasPanel :types="types" :selectedTypeIndex="selectedTypeIndex"/>
+    <section class="section">
+      <div class="columns">
+        <div class="column">
+          <TypesPanel
+            :types.sync="types"
+            :typesList.sync="typesList"
+            :selectedType.sync="selectedType"
+          />
+        </div>
+
+        <div class="column">
+          <DatasPanel :types="types" :selectedType="selectedType"/>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -22,8 +41,22 @@ export default {
   components: { TypesPanel, DatasPanel },
   data() {
     return {
+      totalCount: 0,
+      translatedCount: 0,
+      typesList: [],
       types: [],
-      selectedTypeIndex: 0
+      selectedType: ''
+    }
+  },
+  watch: {
+    typesList() {
+      this.totalCount = 0
+      this.translatedCount = 0
+
+      this.typesList.forEach(item => {
+        this.totalCount += item.totalCount
+        this.translatedCount += item.translatedCount
+      })
     }
   },
   methods: {

@@ -4,22 +4,12 @@
 
     <div class="panel-block">
       <p class="control has-icons-left">
-        <input class="input" type="text" placeholder="검색">
+        <input class="input" type="text" placeholder="검색" v-model="keyword">
         <span class="icon is-left">
           <i class="fas fa-search"></i>
         </span>
       </p>
     </div>
-
-    <!-- <p class="panel-tabs">
-            <a
-              v-for="(tab, index) in tabs"
-              :index="index"
-              :key="index"
-              :class="{ 'is-active': index == selectedTabIndex }"
-              v-on:click="selectTab(index)"
-            >{{tab}} ({{getTabCount(index)}})</a>
-    </p>-->
 
     <TypesItem
       v-for="(type, index) in types"
@@ -27,36 +17,23 @@
       :key="index"
       :id="index"
       :type="type"
-      :selectedTypeIndex="selectedTypeIndex"
-      @click="selectTypeIndex(index)"
+      :selectedType="selectedType"
+      @click="selectType(type._id)"
     />
 
     <div class="panel-block">
       <nav class="pagination" role="navigation" aria-label="pagination">
-        <!-- <a class="pagination-previous">Previous</a>
-        <a class="pagination-next">Next page</a>-->
-
         <ul class="pagination-list">
-          <li>
-            <a class="pagination-link" aria-label="Goto page 1">1</a>
+          <li @click="setPage(0)">
+            <a class="pagination-link">처음으로</a>
           </li>
-          <li>
-            <span class="pagination-ellipsis">&hellip;</span>
+
+          <li v-for="(page, index) in pages" :index="index" :key="index" @click="setPage(page)">
+            <a class="pagination-link" :class="{ 'is-current': page === currentPage }">{{page + 1}}</a>
           </li>
-          <li>
-            <a class="pagination-link" aria-label="Goto page 45">45</a>
-          </li>
-          <li>
-            <a class="pagination-link is-current" aria-label="Page 46" aria-current="page">46</a>
-          </li>
-          <li>
-            <a class="pagination-link" aria-label="Goto page 47">47</a>
-          </li>
-          <li>
-            <span class="pagination-ellipsis">&hellip;</span>
-          </li>
-          <li>
-            <a class="pagination-link" aria-label="Goto page 86">86</a>
+
+          <li @click="setPage(totalPage)">
+            <a class="pagination-link">마지막으로</a>
           </li>
         </ul>
       </nav>
@@ -69,23 +46,37 @@ import Vue from 'vue'
 import axios from 'axios'
 import TypesItem from './items/TypesItem'
 
-const itemPerPage = 5
+const itemPerPage = 10
+const pagePerList = 5
 
 export default {
   components: { TypesItem },
   props: {
+    typesList: {
+      type: Array,
+      default: []
+    },
     types: {
       type: Array,
       default: []
     },
-    selectedTypeIndex: {
-      type: Number,
-      default: 0
+    selectedType: String
+  },
+  watch: {
+    keyword() {
+      this.filterList()
     }
   },
   data() {
     return {
-      typesData: []
+      keyword: '',
+      pagePerList,
+      itemPerPage,
+      currentPage: 0,
+      totalPage: 0,
+      pages: [],
+      typesData: [],
+      filteredList: []
     }
   },
   methods: {
@@ -94,56 +85,75 @@ export default {
     },
     initTypes() {
       axios.get('/api/datas/types').then(res => {
+        this.$emit('update:typesList', res.data)
         this.typesData = res.data
+        this.selectType(this.typesData[0]._id)
 
-        const types = []
-        for (let i = 0; i < itemPerPage; i++) {
-          types.push(this.typesData[i])
-        }
+        this.filterList()
 
-        this.$emit('update:types', types)
         this.$emit('loaded')
       })
     },
-    selectTypeIndex(typeIndex) {
-      this.$emit('update:selectedTypeIndex', typeIndex)
-      this.$emit('changed')
+    filterList() {
+      let temp = this.typesData
+
+      if (this.keyword) {
+        const keyword = this.keyword.toLowerCase()
+        temp = temp.filter(item => {
+          return item._id.toLowerCase().indexOf(keyword) != -1
+        })
+      }
+
+      this.totalPage = Math.ceil(temp.length / itemPerPage)
+      this.filteredList = temp
+
+      this.setPage(0)
+    },
+    initList() {
+      const types = []
+
+      for (let i = 0; i < itemPerPage; i++) {
+        const index = i + this.currentPage * itemPerPage
+        if (index > this.filteredList.length - 1) {
+          break
+        }
+        types.push(this.filteredList[index])
+      }
+
+      this.$emit('update:types', types)
+    },
+    selectType(type) {
+      this.$emit('update:selectedType', type)
+    },
+    setPage(page) {
+      if (page > this.totalPage - 1) {
+        page = this.totalPage - 1
+      }
+
+      if (page < 0) {
+        page = 0
+      }
+
+      this.currentPage = page
+      this.pages = []
+
+      let firstIndex = this.currentPage - Math.floor(pagePerList / 2)
+      if (firstIndex + pagePerList > this.totalPage - 1) {
+        firstIndex - this.totalPage
+      }
+      if (firstIndex < 0) {
+        firstIndex = 0
+      }
+      for (var i = 0; i < pagePerList; i++) {
+        const index = i + firstIndex
+        if (index > this.totalPage - 1) {
+          break
+        }
+        this.pages.push(index)
+      }
+
+      this.initList()
     }
-    // initDatas() {
-    //   const type = this.types[this.selectedTypeIndex]._id
-
-    //   axios.get('/api/datas', { params: { type } }).then(res => {
-    //     this.datas = res.data
-    //     this.initLists()
-    //   })
-    // },
-    // initLists(tabIndex) {
-    //   this.lists = this.filterList(this.selectedTabIndex)
-    // },
-    // selectTab(tabIndex) {
-    //   this.selectedTabIndex = tabIndex
-    //   this.initLists()
-    // },
-    // getTabCount(tabIndex) {
-    //   return this.filterList(tabIndex).length
-    // },
-    // filterList(tabIndex) {
-    //   return this.datas.filter(item => {
-    //     switch (tabIndex) {
-    //       case 1:
-    //         return item.isAccepted
-
-    //       case 2:
-    //         return item.bestTranslate
-
-    //       case 3:
-    //         return !item.isAccepted && !item.bestTranslate
-
-    //       default:
-    //         return true
-    //     }
-    //   })
-    // }
   },
   mounted() {
     this.init()

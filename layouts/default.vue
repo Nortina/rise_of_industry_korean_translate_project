@@ -1,18 +1,18 @@
 <template>
   <div>
-    <section class="hero">
+    <section class="hero has-background-dark">
       <div class="hero-body">
         <div class="container">
           <nav class="level">
-            <div class="level-item title has-text-centered">라이즈 오브 인더스트리 한글로 하고싶어서 만든 사이트</div>
+            <div class="level-item title has-text-centered">
+              <img src="/logo.png">
+            </div>
           </nav>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <nuxt></nuxt>
-    </section>
+    <nuxt></nuxt>
 
     <footer class="footer">
       <div class="content has-text-centered">
